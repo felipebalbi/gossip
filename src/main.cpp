@@ -10,9 +10,9 @@
 #include <fstream>
 #include <iostream>
 #include <ranges>
+#include <regex>
 #include <thread>
 #include <utility>
-#include <regex>
 
 static auto collect_data(int interval, int num_samples)
 {
@@ -33,29 +33,35 @@ static auto collect_data(int interval, int num_samples)
                 continue;
 
             std::ifstream process_name;
-            std::ifstream process_pss;
+            std::ifstream process_smaps;
 
             process_name.open(entry.path() / "cmdline");
             if (!process_name.is_open())
                 continue;
 
-            process_pss.open(entry.path() / "smaps_rollup");
-            if (!process_pss.is_open())
+            process_smaps.open(entry.path() / "smaps_rollup");
+            if (!process_smaps.is_open())
                 continue;
 
             std::string cmdline;
-            std::string pss;
+            std::string pss(4096, ' ');
 
             getline(process_name, cmdline);
 
             if (cmdline.empty())
                 continue;
 
-            getline(process_pss, pss);
-            getline(process_pss, pss);
-            getline(process_pss, pss);
+            process_smaps.read(pss.data(), 4096);
 
-            std::cout << fname << ": " << cmdline << ", " << pss << std::endl;
+            const std::regex pss_regex("Pss:\\s+([0-9]+) kB");
+            std::smatch pss_match;
+
+            auto ret = std::regex_search(pss, pss_match, pss_regex);
+            if (!ret)
+                continue;
+
+            std::cout << fname << ": " << cmdline << "," << pss_match[1].str()
+                      << std::endl;
         }
 
         std::this_thread::sleep_for(std::chrono::seconds(interval));
