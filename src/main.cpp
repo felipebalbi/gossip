@@ -40,8 +40,10 @@ static auto process_directory(auto& entry, auto timestamp, auto& output_file)
         return;
 
     process_smaps.open(entry.path() / "smaps_rollup");
-    if (!process_smaps.is_open())
+    if (!process_smaps.is_open()) {
+        process_name.close();
         return;
+    }
 
     std::string cmdline;
     std::string smaps_rollup(buffer_size, ' ');
@@ -50,6 +52,9 @@ static auto process_directory(auto& entry, auto timestamp, auto& output_file)
 
     std::istringstream iss(cmdline);
     getline(iss, cmdline, ' ');
+
+    process_name.close();
+    process_smaps.close();
 
     if (cmdline.empty())
         return;
