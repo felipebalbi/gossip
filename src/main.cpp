@@ -12,10 +12,12 @@
 #include <iostream>
 #include <ranges>
 #include <regex>
+#include <sstream>
 #include <thread>
 #include <utility>
 
-static auto process_directory(auto& entry, auto timestamp) -> void
+static auto process_directory(auto& entry, auto timestamp, auto& output_file)
+    -> void
 {
     std::tm tm = *std::localtime(&timestamp);
     const std::regex process_regex("([0-9]+)");
@@ -44,7 +46,10 @@ static auto process_directory(auto& entry, auto timestamp) -> void
     std::string cmdline;
     std::string smaps_rollup(buffer_size, ' ');
 
-    getline(process_name, cmdline, ' ');
+    getline(process_name, cmdline, '\0');
+
+    std::istringstream iss(cmdline);
+    getline(iss, cmdline, ' ');
 
     if (cmdline.empty())
         return;
@@ -60,26 +65,26 @@ static auto process_directory(auto& entry, auto timestamp) -> void
 
     auto pss = pss_match[1].str();
 
-    std::cout.imbue(std::locale("en_US.utf8"));
-    std::cout << process_id << ": " << cmdline << "," << pss << ","
-              << std::put_time(&tm, "%F %T %z") << std::endl;
+    output_file << process_id << "," << cmdline << "," << pss << ","
+                << std::put_time(&tm, "%F %T %z") << std::endl;
 }
 
-static auto process_directories(auto& procfs) -> void
+static auto process_directories(auto& procfs, auto& output_file) -> void
 {
     std::time_t timestamp = std::time(nullptr);
 
     for (auto const& entry : std::filesystem::directory_iterator { procfs }) {
-        process_directory(entry, timestamp);
+        process_directory(entry, timestamp, output_file);
     }
 }
 
-static auto collect_data(int interval, int num_samples) -> void
+static auto collect_data(
+    int interval, int num_samples, std::ofstream output_file) -> void
 {
     for (int i = 0; i < num_samples; ++i) {
         const std::filesystem::path procfs { "/proc" };
 
-        process_directories(procfs);
+        process_directories(procfs, output_file);
 
         if (i == num_samples - 1)
             break;
@@ -91,13 +96,13 @@ static auto collect_data(int interval, int num_samples) -> void
 auto main(int argc, char* argv[]) -> int
 {
     constexpr auto program_name = "gossip";
-    constexpr auto default_interval = 30;
-    constexpr auto default_num_samples = 1000;
+    constexpr auto default_interval = 1;
+    constexpr auto default_num_samples = 10;
 
     argparse::ArgumentParser program(program_name);
 
     program.add_argument("-i", "--interval")
-        .help("Sampling interval")
+        .help("Sampling interval in seconds")
         .default_value(default_interval)
         .scan<'i', int>();
 
@@ -105,6 +110,10 @@ auto main(int argc, char* argv[]) -> int
         .help("Stop after this many samples")
         .default_value(default_num_samples)
         .scan<'i', int>();
+
+    program.add_argument("-o", "--output")
+        .help("Output file name")
+        .default_value(std::string("output.csv"));
 
     try {
         program.parse_args(argc, argv);
@@ -116,8 +125,12 @@ auto main(int argc, char* argv[]) -> int
 
     auto interval = program.get<int>("--interval");
     auto num_samples = program.get<int>("--num-samples");
+    auto output = program.get<std::string>("--output");
 
-    std::thread collector { collect_data, interval, num_samples };
+    std::ofstream output_file(output, std::ios::ate);
+
+    std::thread collector { collect_data, interval, num_samples,
+        std::move(output_file) };
     collector.join();
 
     return 0;
