@@ -5,64 +5,84 @@
  * Copyright (C) 2021-2022 Felipe Balbi <felipe@balbi.sh>
  */
 #include <argparse/argparse.hpp>
-#include <chrono>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <ranges>
 #include <regex>
 #include <thread>
 #include <utility>
 
-static auto collect_data(int interval, int num_samples)
+static auto process_directory(auto& entry, auto timestamp) -> void
 {
+    std::tm tm = *std::localtime(&timestamp);
     const std::regex process_regex("([0-9]+)");
+    constexpr auto buffer_size = 256 * 1024;
     std::smatch process_match;
 
+    std::string process_id = entry.path().filename().string();
+
+    if (!entry.is_directory())
+        return;
+
+    if (!std::regex_match(process_id, process_match, process_regex))
+        return;
+
+    std::ifstream process_name;
+    std::ifstream process_smaps;
+
+    process_name.open(entry.path() / "cmdline");
+    if (!process_name.is_open())
+        return;
+
+    process_smaps.open(entry.path() / "smaps_rollup");
+    if (!process_smaps.is_open())
+        return;
+
+    std::string cmdline;
+    std::string smaps_rollup(buffer_size, ' ');
+
+    getline(process_name, cmdline, ' ');
+
+    if (cmdline.empty())
+        return;
+
+    process_smaps.read(smaps_rollup.data(), buffer_size);
+
+    const std::regex pss_regex("Pss:\\s+([0-9]+) kB");
+    std::smatch pss_match;
+
+    auto ret = std::regex_search(smaps_rollup, pss_match, pss_regex);
+    if (!ret)
+        return;
+
+    auto pss = pss_match[1].str();
+
+    std::cout.imbue(std::locale("en_US.utf8"));
+    std::cout << process_id << ": " << cmdline << "," << pss << ","
+              << std::put_time(&tm, "%F %T %z") << std::endl;
+}
+
+static auto process_directories(auto& procfs) -> void
+{
+    std::time_t timestamp = std::time(nullptr);
+
+    for (auto const& entry : std::filesystem::directory_iterator { procfs }) {
+        process_directory(entry, timestamp);
+    }
+}
+
+static auto collect_data(int interval, int num_samples) -> void
+{
     for (int i = 0; i < num_samples; ++i) {
         const std::filesystem::path procfs { "/proc" };
 
-        for (auto const& entry :
-            std::filesystem::directory_iterator { procfs }) {
-            std::string fname = entry.path().filename().string();
+        process_directories(procfs);
 
-            if (!entry.is_directory())
-                continue;
-
-            if (!std::regex_match(fname, process_match, process_regex))
-                continue;
-
-            std::ifstream process_name;
-            std::ifstream process_smaps;
-
-            process_name.open(entry.path() / "cmdline");
-            if (!process_name.is_open())
-                continue;
-
-            process_smaps.open(entry.path() / "smaps_rollup");
-            if (!process_smaps.is_open())
-                continue;
-
-            std::string cmdline;
-            std::string pss(4096, ' ');
-
-            getline(process_name, cmdline);
-
-            if (cmdline.empty())
-                continue;
-
-            process_smaps.read(pss.data(), 4096);
-
-            const std::regex pss_regex("Pss:\\s+([0-9]+) kB");
-            std::smatch pss_match;
-
-            auto ret = std::regex_search(pss, pss_match, pss_regex);
-            if (!ret)
-                continue;
-
-            std::cout << fname << ": " << cmdline << "," << pss_match[1].str()
-                      << std::endl;
-        }
+        if (i == num_samples - 1)
+            break;
 
         std::this_thread::sleep_for(std::chrono::seconds(interval));
     }
@@ -99,8 +119,6 @@ auto main(int argc, char* argv[]) -> int
 
     std::thread collector { collect_data, interval, num_samples };
     collector.join();
-
-    std::cout << interval << " " << num_samples << std::endl;
 
     return 0;
 }
