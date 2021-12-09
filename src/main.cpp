@@ -53,11 +53,11 @@ static auto process_directory(auto& entry, auto timestamp, auto& output_file)
     std::istringstream iss(cmdline);
     getline(iss, cmdline, ' ');
 
-    process_name.close();
-    process_smaps.close();
-
-    if (cmdline.empty())
+    if (cmdline.empty()) {
+        process_name.close();
+        process_smaps.close();
         return;
+    }
 
     process_smaps.read(smaps_rollup.data(), buffer_size);
 
@@ -65,13 +65,19 @@ static auto process_directory(auto& entry, auto timestamp, auto& output_file)
     std::smatch pss_match;
 
     auto ret = std::regex_search(smaps_rollup, pss_match, pss_regex);
-    if (!ret)
+    if (!ret) {
+        process_name.close();
+        process_smaps.close();
         return;
+    }
 
     auto pss = pss_match[1].str();
 
     output_file << process_id << "," << cmdline << "," << pss << ","
                 << std::put_time(&tm, "%F %T %z") << std::endl;
+
+    process_name.close();
+    process_smaps.close();
 }
 
 static auto process_directories(auto& procfs, auto& output_file) -> void
