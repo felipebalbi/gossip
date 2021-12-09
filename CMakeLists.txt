@@ -20,12 +20,5 @@ if(NOT CMAKE_BUILD_TYPE)
     FORCE)
 endif()
 
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-
 include_directories(include)
 add_subdirectory(src)
-
-if(BUILD_TESTS)
-  enable_testing()
-  add_subdirectory(test)
-endif()
