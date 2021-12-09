@@ -80,9 +80,10 @@ static auto process_directory(auto& entry, auto timestamp, auto& output_file)
     process_smaps.close();
 }
 
-static auto process_directories(auto& procfs, auto& output_file) -> void
+static auto process_directories(auto& output_file) -> void
 {
     std::time_t timestamp = std::time(nullptr);
+    const std::filesystem::path procfs { "/proc" };
 
     for (auto const& entry : std::filesystem::directory_iterator { procfs }) {
         process_directory(entry, timestamp, output_file);
@@ -93,9 +94,7 @@ static auto collect_data(
     int interval, int num_samples, std::ofstream output_file) -> void
 {
     for (int i = 0; i < num_samples; ++i) {
-        const std::filesystem::path procfs { "/proc" };
-
-        process_directories(procfs, output_file);
+        process_directories(output_file);
 
         if (i == num_samples - 1)
             break;
