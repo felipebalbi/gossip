@@ -91,7 +91,7 @@ static auto process_directories(auto& output_file) -> void
 }
 
 static auto collect_data(
-    int interval, int num_samples, std::ofstream output_file) -> void
+    int interval, int num_samples, std::ofstream& output_file) -> void
 {
     for (int i = 0; i < num_samples; ++i) {
         process_directories(output_file);
@@ -138,10 +138,7 @@ auto main(int argc, char* argv[]) -> int
     auto output = program.get<std::string>("--output");
 
     std::ofstream output_file(output, std::ios::ate);
-
-    std::thread collector { collect_data, interval, num_samples,
-        std::move(output_file) };
-    collector.join();
+    collect_data(interval, num_samples, output_file);
 
     return 0;
 }
