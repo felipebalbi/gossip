@@ -22,3 +22,5 @@ set(CMAKE_OBJDUMP ${triple}-objdump)
 set(CMAKE_RANLIB ${triple}-ranlib)
 set(CMAKE_READELF ${triple}-readelf)
 set(CMAKE_STRIP ${triple}-strip)
+
+set(CMAKE_TOOLCHAIN_EXTRA_CFLAGS "-static")

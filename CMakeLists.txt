@@ -5,8 +5,8 @@ project(gossip VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -pg -ggdb -DDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -flto")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${CMAKE_TOOLCHAIN_EXTRA_CFLAGS} -O0 -pg -ggdb -DDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_TOOLCHAIN_EXTRA_CFLAGS} -O2 -flto")
 
 # Temporarily disabling `clang-tidy' as it can't handle view
 # composition syntax
