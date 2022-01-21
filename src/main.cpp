@@ -82,8 +82,9 @@ static auto process_directory(auto& entry, auto timestamp, auto& output_file)
 
 static auto process_directories(auto& output_file) -> void
 {
-    std::time_t timestamp = std::time(nullptr);
     const std::filesystem::path procfs { "/proc" };
+    std::time_t timestamp = std::chrono::system_clock::to_time_t(
+        std::chrono::system_clock::now());
 
     for (auto const& entry : std::filesystem::directory_iterator { procfs }) {
         process_directory(entry, timestamp, output_file);
