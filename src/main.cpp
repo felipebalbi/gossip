@@ -16,12 +16,44 @@
 #include <thread>
 #include <utility>
 
+static auto parse_directory(
+    auto& entry, auto& process_id, auto& tm, auto& output_file) -> void
+{
+    std::ifstream process_name { entry.path() / "cmdline" };
+    std::ifstream process_smaps { entry.path() / "smaps_rollup" };
+
+    std::string cmdline;
+
+    getline(process_name, cmdline, '\0');
+
+    std::istringstream iss(cmdline);
+    getline(iss, cmdline, ' ');
+
+    if (cmdline.empty())
+        return;
+
+    std::string line;
+
+    while (getline(process_smaps, line)) {
+        const std::regex pss_regex("^Pss:\\s+([0-9]+) kB$");
+        std::smatch pss_match;
+
+        auto ret = std::regex_search(line, pss_match, pss_regex);
+        if (!ret)
+            continue;
+
+        auto pss = pss_match[1].str();
+
+        output_file << process_id << "," << cmdline << "," << pss << ","
+                    << std::put_time(&tm, "%F %T %z") << std::endl;
+    }
+}
+
 static auto process_directory(auto& entry, auto timestamp, auto& output_file)
     -> void
 {
     std::tm tm = *std::localtime(&timestamp);
     const std::regex process_regex("([0-9]+)");
-    constexpr auto buffer_size = 256 * 1024;
     std::smatch process_match;
 
     std::string process_id = entry.path().filename().string();
@@ -32,52 +64,7 @@ static auto process_directory(auto& entry, auto timestamp, auto& output_file)
     if (!std::regex_match(process_id, process_match, process_regex))
         return;
 
-    std::ifstream process_name;
-    std::ifstream process_smaps;
-
-    process_name.open(entry.path() / "cmdline");
-    if (!process_name.is_open())
-        return;
-
-    process_smaps.open(entry.path() / "smaps_rollup");
-    if (!process_smaps.is_open()) {
-        process_name.close();
-        return;
-    }
-
-    std::string cmdline;
-    std::string smaps_rollup(buffer_size, ' ');
-
-    getline(process_name, cmdline, '\0');
-
-    std::istringstream iss(cmdline);
-    getline(iss, cmdline, ' ');
-
-    if (cmdline.empty()) {
-        process_name.close();
-        process_smaps.close();
-        return;
-    }
-
-    process_smaps.read(smaps_rollup.data(), buffer_size);
-
-    const std::regex pss_regex("Pss:\\s+([0-9]+) kB");
-    std::smatch pss_match;
-
-    auto ret = std::regex_search(smaps_rollup, pss_match, pss_regex);
-    if (!ret) {
-        process_name.close();
-        process_smaps.close();
-        return;
-    }
-
-    auto pss = pss_match[1].str();
-
-    output_file << process_id << "," << cmdline << "," << pss << ","
-                << std::put_time(&tm, "%F %T %z") << std::endl;
-
-    process_name.close();
-    process_smaps.close();
+    parse_directory(entry, process_id, tm, output_file);
 }
 
 static auto process_directories(auto& output_file) -> void
