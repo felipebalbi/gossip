@@ -19,21 +19,13 @@
 static auto parse_directory(
     auto& entry, auto& process_id, auto& tm, auto& output_file) -> void
 {
-    std::ifstream process_name { entry.path() / "cmdline" };
+    std::ifstream process_name { entry.path() / "comm" };
     std::ifstream process_smaps { entry.path() / "smaps_rollup" };
 
-    std::string cmdline;
-
-    getline(process_name, cmdline, '\0');
-
-    std::istringstream iss(cmdline);
-    getline(iss, cmdline, ' ');
-
-    if (cmdline.empty())
-        return;
+    std::string comm;
+    getline(process_name, comm);
 
     std::string line;
-
     while (getline(process_smaps, line)) {
         const std::regex pss_regex("^Pss:\\s+([0-9]+) kB$");
         std::smatch pss_match;
@@ -44,7 +36,7 @@ static auto parse_directory(
 
         auto pss = pss_match[1].str();
 
-        output_file << process_id << "," << cmdline << "," << pss << ","
+        output_file << process_id << "," << comm << "," << pss << ","
                     << std::put_time(&tm, "%F %T %z") << std::endl;
     }
 }
