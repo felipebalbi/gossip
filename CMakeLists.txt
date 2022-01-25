@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.18)
 
 set(GOSSIP_VERSION 1.0.0)
 
