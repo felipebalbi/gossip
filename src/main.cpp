@@ -16,6 +16,26 @@
 #include <thread>
 #include <utility>
 
+static auto parse_file(auto& stream, auto& regex) -> int
+{
+    std::string line;
+    int value;
+
+    while (getline(stream, line)) {
+        std::smatch match;
+
+        auto ret = std::regex_search(line, match, regex);
+        if (!ret)
+            continue;
+
+        value = std::stoi(match[1]);
+
+        return value;
+    }
+
+    return -1;
+}
+
 static auto parse_directory(
     auto& entry, auto& process_id, auto& tm, auto& output_file) -> void
 {
@@ -25,20 +45,15 @@ static auto parse_directory(
     std::string comm;
     getline(process_name, comm);
 
-    std::string line;
-    while (getline(process_smaps, line)) {
-        const std::regex pss_regex("^Pss:\\s+([0-9]+) kB$");
-        std::smatch pss_match;
+    const std::regex pss_regex("^Pss:\\s+([0-9]+) kB$");
+    auto pss = parse_file(process_smaps, pss_regex);
 
-        auto ret = std::regex_search(line, pss_match, pss_regex);
-        if (!ret)
-            continue;
+    /* Skip processes without valid PSS */
+    if (pss == -1)
+        return;
 
-        auto pss = pss_match[1].str();
-
-        output_file << process_id << "," << comm << "," << pss << ","
-                    << std::put_time(&tm, "%F %T %z") << std::endl;
-    }
+    output_file << process_id << "," << comm << "," << pss << ","
+                << std::put_time(&tm, "%F %T %z") << std::endl;
 }
 
 static auto process_directory(auto& entry, auto timestamp, auto& output_file)
