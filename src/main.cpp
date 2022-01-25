@@ -8,15 +8,16 @@
 #include <ctime>
 #include <filesystem>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <ranges>
 #include <regex>
 #include <sstream>
+#include <string>
 #include <thread>
 #include <utility>
 
-static auto parse_file(auto& stream, auto& regex) -> int
+static auto parse_contents(auto& stream, auto& regex) -> int
 {
     std::string line;
     int value;
@@ -36,6 +37,24 @@ static auto parse_file(auto& stream, auto& regex) -> int
     return -1;
 }
 
+static auto read_file(auto& stream, auto& contents) -> void
+{
+    constexpr auto read_size = std::size_t(4096);
+    auto buf = std::string(read_size, '\0');
+
+    /*
+     * First line contains address space details which we're not
+     * interested in. It's safe to just drop it
+     */
+    stream.getline(buf.data(), read_size, '\n');
+
+    while (stream.read(buf.data(), read_size)) {
+        contents.append(buf, 0, stream.gcount());
+    }
+
+    contents.append(buf, 0, stream.gcount());
+}
+
 static auto parse_directory(
     auto& entry, auto& process_id, auto& tm, auto& output_file) -> void
 {
@@ -45,8 +64,13 @@ static auto parse_directory(
     std::string comm;
     getline(process_name, comm);
 
+    std::string contents = std::string();
+    read_file(process_smaps, contents);
+
+    std::istringstream smaps_stream { contents };
+
     const std::regex pss_regex("^Pss:\\s+([0-9]+) kB$");
-    auto pss = parse_file(process_smaps, pss_regex);
+    auto pss = parse_contents(smaps_stream, pss_regex);
 
     /* Skip processes without valid PSS */
     if (pss == -1)
