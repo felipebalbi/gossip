@@ -61,3 +61,52 @@ Optional arguments:
 -n --num-samples 	Stop after this many samples [default: 10]
 -o --output      	Output file name [default: "output.csv"]
 ```
+
+## Output Contents
+
+`gossip` will traverse the `/proc` filesystem looking for process
+directories. For each of the directories it will read two files:
+
+1. `comm`: contains the process name
+2. `smaps_rollup`: contains details regarding process' memory usage
+
+From `comm`, we have a single string to extract with a `read()`;
+`smaps_rollup` needs to be parsed. The file format is somewhat like
+shown below:
+
+```
+556022e84000-7ffd4edcd000 ---p 00000000 00:00 0                          [rollup]
+Rss:              400352 kB
+Pss:              361496 kB
+Pss_Anon:         290092 kB
+Pss_File:          71216 kB
+Pss_Shmem:           188 kB
+Shared_Clean:      44348 kB
+Shared_Dirty:        384 kB
+Private_Clean:     65528 kB
+Private_Dirty:    290092 kB
+Referenced:       385692 kB
+Anonymous:        290092 kB
+LazyFree:              0 kB
+AnonHugePages:         0 kB
+ShmemPmdMapped:        0 kB
+FilePmdMapped:         0 kB
+Shared_Hugetlb:        0 kB
+Private_Hugetlb:       0 kB
+Swap:                  0 kB
+SwapPss:               0 kB
+Locked:                0 kB
+```
+
+The first line contains details of the address space and is
+unimportant for `gossip` and merely skipped. For the other lines, each
+numeric value is extracted and used to build a line in CSV
+format.
+
+Each line in `gossip`'s output contains process `PID`, process name,
+and each of the values from `smaps_rollup` in the order they are
+extracted. Any further processing is expected to happen
+after-the-fact. This was deliberate decision to make sure `gossip`
+would run quickly and consume very little memory (currently below
+1MiB, most of which comes from `libstdc++` itself).
+
