@@ -17,24 +17,22 @@
 #include <thread>
 #include <utility>
 
-static auto parse_contents(auto& stream, auto& regex) -> int
+static auto parse_and_process_contents(auto& contents, auto& output_file)
+    -> void
 {
-    std::string line;
-    int value;
+    std::regex values_regex("[0-9]+");
+    auto values_begin
+        = std::sregex_iterator(contents.begin(), contents.end(), values_regex);
+    auto values_end = std::sregex_iterator();
 
-    while (getline(stream, line)) {
-        std::smatch match;
+    for (std::sregex_iterator i = values_begin; i != values_end; ++i) {
+        std::smatch match = *i;
+        std::string str = match.str();
 
-        auto ret = std::regex_search(line, match, regex);
-        if (!ret)
-            continue;
-
-        value = std::stoi(match[1]);
-
-        return value;
+        output_file << str << ",";
     }
 
-    return -1;
+    output_file << std::endl;
 }
 
 static auto read_file(auto& stream, auto& contents) -> void
@@ -67,17 +65,16 @@ static auto parse_directory(
     std::string contents = std::string();
     read_file(process_smaps, contents);
 
-    std::istringstream smaps_stream { contents };
-
-    const std::regex pss_regex("^Pss:\\s+([0-9]+) kB$");
-    auto pss = parse_contents(smaps_stream, pss_regex);
-
-    /* Skip processes without valid PSS */
-    if (pss == -1)
+    /*
+     * If the contents of smaps_rollup are empty, ignore this
+     * process. It must be a kernel thread, such as a kworker.
+     */
+    if (contents.empty())
         return;
 
-    output_file << process_id << "," << comm << "," << pss << ","
-                << std::put_time(&tm, "%F %T %z") << std::endl;
+    output_file << process_id << "," << comm << ",";
+
+    parse_and_process_contents(contents, output_file);
 }
 
 static auto process_directory(auto& entry, auto timestamp, auto& output_file)
