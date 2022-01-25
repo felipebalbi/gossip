@@ -69,8 +69,9 @@ static auto parse_directory(
      * If the contents of smaps_rollup are empty, ignore this
      * process. It must be a kernel thread, such as a kworker.
      */
-    if (contents.empty())
+    if (contents.empty()) {
         return;
+    }
 
     output_file << process_id << "," << comm << ",";
 
@@ -86,11 +87,13 @@ static auto process_directory(auto& entry, auto timestamp, auto& output_file)
 
     std::string process_id = entry.path().filename().string();
 
-    if (!entry.is_directory())
+    if (!entry.is_directory()) {
         return;
+    }
 
-    if (!std::regex_match(process_id, process_match, process_regex))
+    if (!std::regex_match(process_id, process_match, process_regex)) {
         return;
+    }
 
     parse_directory(entry, process_id, tm, output_file);
 }
@@ -106,16 +109,17 @@ static auto process_directories(auto& output_file) -> void
     }
 }
 
-static auto collect_data(
-    int interval, int num_samples, std::ofstream& output_file) -> void
+static auto collect_data(std::chrono::seconds& seconds, int num_samples,
+    std::ofstream& output_file) -> void
 {
     for (int i = 0; i < num_samples; ++i) {
         process_directories(output_file);
 
-        if (i == num_samples - 1)
+        if (i == num_samples - 1) {
             break;
+        }
 
-        std::this_thread::sleep_for(std::chrono::seconds(interval));
+        std::this_thread::sleep_for(seconds);
     }
 }
 
@@ -153,8 +157,10 @@ auto main(int argc, char* argv[]) -> int
     auto num_samples = program.get<int>("--num-samples");
     auto output = program.get<std::string>("--output");
 
+    auto seconds = std::chrono::seconds(interval);
     std::ofstream output_file(output, std::ios::ate);
-    collect_data(interval, num_samples, output_file);
+
+    collect_data(seconds, num_samples, output_file);
 
     return 0;
 }
