@@ -37,7 +37,7 @@ static auto parse_and_process_contents(auto& contents, auto& output_file)
 
 static auto read_file(auto& stream, auto& contents) -> void
 {
-    constexpr auto read_size = std::size_t(4096);
+    constexpr auto read_size = std::size_t(1024);
     auto buf = std::string(read_size, '\0');
 
     /*
