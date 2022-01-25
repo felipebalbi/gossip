@@ -89,7 +89,7 @@ auto main(int argc, char* argv[]) -> int
     constexpr auto default_interval = 1;
     constexpr auto default_num_samples = 10;
 
-    argparse::ArgumentParser program(program_name);
+    argparse::ArgumentParser program(program_name, GOSSIP_VERSION);
 
     program.add_argument("-i", "--interval")
         .help("Sampling interval in seconds")
