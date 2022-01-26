@@ -56,9 +56,9 @@ $ cmake \
     -DCMAKE_TOOLCHAIN_FILE=$NDK/build/cmake/android.toolchain.cmake \
     -DANDROID_PLATFORM=android-$MINSDKVERSION                       \
     -DANDROID_ABI=$ABI                                              \
-	-DCMAKE_BUILD_TYPE=Release                                      \
-	-DCMAKE_SYSTEM_NAME=Android                                     \
-	-DCMAKE_SYSTEM_VERSION=$MINSDKVERSION ..
+    -DCMAKE_BUILD_TYPE=Release                                      \
+    -DCMAKE_SYSTEM_NAME=Android                                     \
+    -DCMAKE_SYSTEM_VERSION=$MINSDKVERSION ..
 $ cmake --build .
 ```
 
