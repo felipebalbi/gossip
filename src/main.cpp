@@ -130,36 +130,35 @@ auto main(int argc, char* argv[]) -> int
 
     argparse::ArgumentParser program(program_name, GOSSIP_VERSION);
 
-    program.add_argument("-i", "--interval")
-        .help("Sampling interval in seconds")
-        .default_value(default_interval)
-        .scan<'i', int>();
-
-    program.add_argument("-n", "--num-samples")
-        .help("Stop after this many samples")
-        .default_value(default_num_samples)
-        .scan<'i', int>();
-
-    program.add_argument("-o", "--output")
-        .help("Output file name")
-        .default_value(std::string("output.csv"));
-
     try {
+        program.add_argument("-i", "--interval")
+            .help("Sampling interval in seconds")
+            .default_value(default_interval)
+            .scan<'i', int>();
+
+        program.add_argument("-n", "--num-samples")
+            .help("Stop after this many samples")
+            .default_value(default_num_samples)
+            .scan<'i', int>();
+
+        program.add_argument("-o", "--output")
+            .help("Output file name")
+            .default_value(std::string("output.csv"));
+
         program.parse_args(argc, argv);
-    } catch (const std::runtime_error& err) {
+        auto interval = program.get<int>("--interval");
+        auto num_samples = program.get<int>("--num-samples");
+        auto output = program.get<std::string>("--output");
+
+        auto seconds = std::chrono::seconds(interval);
+        std::ofstream output_file(output, std::ios::ate);
+
+        collect_data(seconds, num_samples, output_file);
+    } catch (const std::exception& err) {
         std::cerr << err.what() << std::endl;
-        std::cerr << program;
+        std::cerr << program << std::endl;
         std::exit(1);
     }
-
-    auto interval = program.get<int>("--interval");
-    auto num_samples = program.get<int>("--num-samples");
-    auto output = program.get<std::string>("--output");
-
-    auto seconds = std::chrono::seconds(interval);
-    std::ofstream output_file(output, std::ios::ate);
-
-    collect_data(seconds, num_samples, output_file);
 
     return 0;
 }
