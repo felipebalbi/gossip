@@ -13,7 +13,7 @@ set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 
 add_definitions(-DGOSSIP_VERSION="${GOSSIP_VERSION}")
 
-if(NOT CMAKE_BUILD_TYPE)
+if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING
     "Choose build type: None Debug Release RelWithDebInfo MinSizeRel"
     FORCE)
