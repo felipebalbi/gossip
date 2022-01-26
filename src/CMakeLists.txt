@@ -9,5 +9,6 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(argparse)
 
+add_library(libgossip Collector.cpp)
 add_executable(gossip main.cpp)
-target_link_libraries(gossip argparse::argparse)
+target_link_libraries(gossip libgossip argparse::argparse)
