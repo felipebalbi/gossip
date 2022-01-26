@@ -1,3 +1,5 @@
+![Build](https://github.com/felipebalbi/gossip/workflows/CMake/badge.svg)
+
 # Gossip
 
 ## Introduction
