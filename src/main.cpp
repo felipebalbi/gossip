@@ -153,6 +153,16 @@ auto main(int argc, char* argv[]) -> int
         auto seconds = std::chrono::seconds(interval);
         std::ofstream output_file(output, std::ios::ate);
 
+        output_file << "# "
+                       "PID,Comm,Rss,Pss,Pss_Anon,Pss_File,Pss_Shmem,Shared_"
+                       "Clean,Shared_Dirty,"
+                       "Private_Clean,Private_Dirty,Referenced,Anonymous,"
+                       "LazyFree,AnonHugePages,"
+                       "ShmemPmdMapped,FilePmdMapped,Shared_Hugetlb,Private_"
+                       "Hugetlb,Swap,SwapPss,"
+                       "Locked,Timestamp"
+                    << std::endl;
+
         collect_data(seconds, num_samples, output_file);
     } catch (const std::exception& err) {
         std::cerr << err.what() << std::endl;
