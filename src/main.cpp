@@ -16,8 +16,8 @@
 #include <thread>
 #include <utility>
 
-static auto parse_and_process_contents(auto& contents, auto& output_file)
-    -> void
+static auto parse_and_process_contents(
+    auto& contents, auto& tm, auto& output_file) -> void
 {
     std::regex values_regex("[0-9]+");
     auto values_begin
@@ -31,7 +31,7 @@ static auto parse_and_process_contents(auto& contents, auto& output_file)
         output_file << str << ",";
     }
 
-    output_file << std::endl;
+    output_file << std::put_time(&tm, "%F %T %z") << std::endl;
 }
 
 static auto read_file(auto& stream, auto& contents) -> void
@@ -74,7 +74,7 @@ static auto parse_directory(
 
     output_file << process_id << "," << comm << ",";
 
-    parse_and_process_contents(contents, output_file);
+    parse_and_process_contents(contents, tm, output_file);
 }
 
 static auto process_directory(auto& entry, auto timestamp, auto& output_file)
