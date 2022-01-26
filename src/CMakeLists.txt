@@ -10,4 +10,4 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(argparse)
 
 add_executable(gossip main.cpp)
-target_link_libraries(gossip argparse::argparse stdc++fs)
+target_link_libraries(gossip argparse::argparse)
