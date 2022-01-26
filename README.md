@@ -37,6 +37,39 @@ $ cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/aarch64-toolchain.cmake ..
 $ cmake --build .
 ```
 
+### Cross-compiling for Android AArch64
+
+We can use Android NDK to compile `gossip` for Android. Assuming NDK
+is installed to `/opt/android-ndk`, make sure the following variables
+are set:
+
+```
+$ export NDK=/opt/android-ndk ABI=arm64-v8a MINSDKVERSION=23
+```
+
+After that we can start build:
+
+```
+$ mkdir build
+$ cd build
+$ cmake \
+    -DCMAKE_TOOLCHAIN_FILE=$NDK/build/cmake/android.toolchain.cmake \
+    -DANDROID_PLATFORM=android-$MINSDKVERSION                       \
+    -DANDROID_ABI=$ABI                                              \
+	-DCMAKE_BUILD_TYPE=Release                                      \
+	-DCMAKE_SYSTEM_NAME=Android                                     \
+	-DCMAKE_SYSTEM_VERSION=$MINSDKVERSION ..
+$ cmake --build .
+```
+
+The resulting binary should be pushed to the device using `adb`. Note
+that this requires a rooted device with read-write partition that can
+take runnable executables.
+
+```
+$ adb push src/gossip /path/to/location
+```
+
 ## Running
 
 After compiling the binary we can run it as follows:
