@@ -10,7 +10,6 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <ranges>
 #include <regex>
 #include <sstream>
 #include <string>
