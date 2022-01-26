@@ -25,12 +25,6 @@ public:
     auto collect_data() -> void;
 
 private:
-    auto parse_and_process_contents(auto& contents, auto& tm) -> void;
-    auto read_file(auto& stream, auto& contents) -> void;
-    auto parse_directory(auto& entry, auto& process_id, auto& tm) -> void;
-    auto process_directory(auto& entry, auto timestamp) -> void;
-    auto process_directories(auto& output_file) -> void;
-
     auto process_directories() -> void;
 
     std::chrono::seconds& seconds;
