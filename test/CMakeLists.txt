@@ -7,7 +7,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/contrib)
 
-add_executable(tests test.cpp)
+add_executable(tests test.cpp test_process.cpp)
 target_link_libraries(tests PRIVATE $<TARGET_OBJECTS:libgossip> Catch2::Catch2)
 
 include(CTest)
