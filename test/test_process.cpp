@@ -85,7 +85,7 @@ TEST_CASE("Processes can extract their data", "[Process]")
     std::filesystem::remove_all("proc");
 }
 
-TEST_CASE("Invalid processes raise exceptions", "[Process]")
+TEST_CASE("Invalid processes don't crash", "[Process]")
 {
     std::filesystem::current_path(std::filesystem::temp_directory_path());
     std::filesystem::create_directory("proc");
@@ -108,6 +108,41 @@ TEST_CASE("Invalid processes raise exceptions", "[Process]")
         REQUIRE_THROWS_AS(process.extract(), std::invalid_argument);
     }
 
+    SECTION("empty `cmdline' produces `unknown'")
+    {
+        const std::filesystem::path base { proc / "2" };
+        std::filesystem::create_directory(base);
+        const std::filesystem::directory_entry entry { base };
+
+        const std::filesystem::path cmdline { base / "cmdline" };
+        const std::filesystem::path smaps_rollup { base / "smaps_rollup" };
+
+        std::ofstream cmdline_stream { cmdline };
+        std::ofstream smaps_stream { smaps_rollup };
+
+        cmdline_stream << "";
+        cmdline_stream.flush();
+
+        smaps_stream << "skipped\n1\n2\n3" << std::endl;
+
+        std::time_t timestamp = std::chrono::system_clock::to_time_t(
+            std::chrono::system_clock::now());
+        std::tm tm = *std::localtime(&timestamp);
+
+        Gossip::Process process { entry, tm };
+
+        std::ostringstream expected {};
+        std::ostringstream output {};
+
+        expected << "2,unknown,1,2,3," << std::put_time(&tm, "%F %T %z")
+                 << std::endl;
+
+        process.extract();
+        output << process;
+
+        REQUIRE(output.str() == expected.str());
+    }
+
     SECTION("empty `smaps_rollup' raises runtime_error")
     {
         const std::filesystem::path base { proc / "2" };
@@ -124,6 +159,33 @@ TEST_CASE("Invalid processes raise exceptions", "[Process]")
         cmdline_stream.flush();
 
         smaps_stream << "" << std::endl;
+
+        std::time_t timestamp = std::chrono::system_clock::to_time_t(
+            std::chrono::system_clock::now());
+        std::tm tm = *std::localtime(&timestamp);
+
+        Gossip::Process process { entry, tm };
+
+        REQUIRE_THROWS_AS(process.extract(), std::runtime_error);
+    }
+
+    SECTION("`smaps_rollup' without numbers raises runtime_error")
+    {
+        const std::filesystem::path base { proc / "2" };
+        std::filesystem::create_directory(base);
+        const std::filesystem::directory_entry entry { base };
+
+        const std::filesystem::path cmdline { base / "cmdline" };
+        const std::filesystem::path smaps_rollup { base / "smaps_rollup" };
+
+        std::ofstream cmdline_stream { cmdline };
+        std::ofstream smaps_stream { smaps_rollup };
+
+        cmdline_stream << "process";
+        cmdline_stream.flush();
+
+        smaps_stream << "the quick brown fox jumps over the lazy dog"
+                     << std::endl;
 
         std::time_t timestamp = std::chrono::system_clock::to_time_t(
             std::chrono::system_clock::now());
