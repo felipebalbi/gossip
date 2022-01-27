@@ -34,10 +34,13 @@ auto Gossip::Collector::collect_data() -> void
 auto Gossip::Collector::process_directories() -> void
 {
     const std::filesystem::path procfs { "/proc" };
+    std::time_t timestamp = std::chrono::system_clock::to_time_t(
+        std::chrono::system_clock::now());
+    std::tm tm = *std::localtime(&timestamp);
 
     for (auto const& entry : std::filesystem::directory_iterator { procfs }) {
         try {
-            Gossip::Process process { entry };
+            Gossip::Process process { entry, tm };
             process.extract();
 
             output << process;

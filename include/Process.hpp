@@ -16,8 +16,10 @@
 namespace Gossip {
 class Process {
 public:
-    Process(const std::filesystem::directory_entry& directory)
+    Process(
+        const std::filesystem::directory_entry& directory, const std::tm& tm)
         : directory(directory)
+        , tm(tm)
     {
         pid = -1;
     }
@@ -43,9 +45,11 @@ private:
     auto get_values() -> void;
     
     int pid;
-    std::tm tm;
+
     std::string comm;
     std::vector<int> values;
+
+    const std::tm& tm;
     const std::filesystem::directory_entry& directory;
 };
 };

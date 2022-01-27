@@ -18,11 +18,6 @@
 
 auto Gossip::Process::extract() -> void
 {
-    std::time_t timestamp = std::chrono::system_clock::to_time_t(
-        std::chrono::system_clock::now());
-
-    tm = *std::localtime(&timestamp);
-
     get_pid();
     get_cmdline();
     get_values();
