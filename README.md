@@ -1,4 +1,4 @@
-![Build](https://github.com/felipebalbi/gossip/workflows/CMake/badge.svg)
+![Build](https://github.com/felipebalbi/gossip/workflows/CMake/badge.svg) ![Android](https://github.com/felipebalbi/gossip/workflows/Android/badge.svg)
 
 # Gossip
 
