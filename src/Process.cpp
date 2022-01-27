@@ -7,14 +7,11 @@
 
 #include <Process.hpp>
 #include <chrono>
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <regex>
-#include <stdexcept>
+#include <sstream>
 #include <string>
-#include <utility>
-#include <vector>
 
 auto Gossip::Process::extract() -> void
 {

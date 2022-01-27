@@ -7,16 +7,11 @@
 
 #include <Collector.hpp>
 #include <Process.hpp>
-#include <ctime>
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <iterator>
-#include <regex>
 #include <sstream>
-#include <string>
 #include <thread>
-#include <utility>
 
 auto Gossip::Collector::collect_data() -> void
 {
