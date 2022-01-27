@@ -12,7 +12,7 @@ post-process with a spreadsheet or Jupyter Notebooks.
 
 ## Building
 
-Minimal introductions for building the tool in both supported modes
+Minimal instructions for building the tool in all supported modes
 follow.
 
 ### Compiling for the current Host environment
@@ -37,7 +37,7 @@ $ cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/aarch64-toolchain.cmake ..
 $ cmake --build .
 ```
 
-### Cross-compiling for Android AArch64
+### Cross-compiling for Android
 
 We can use Android NDK to compile `gossip` for Android. Assuming NDK
 is installed to `/opt/android-ndk`, make sure the following variables
@@ -47,7 +47,8 @@ are set:
 $ export NDK=/opt/android-ndk ABI=arm64-v8a MINSDKVERSION=23
 ```
 
-After that we can start build:
+Of course, replace the values to match your target device. After that
+we can start the build:
 
 ```
 $ mkdir build
