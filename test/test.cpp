@@ -4,8 +4,10 @@
  *
  * Copyright (C) 2021-2022 Felipe Balbi <felipe@balbi.sh>
  */
+#define CATCH_CONFIG_MAIN
+
 #include <Process.hpp>
-#include <catch2/catch_all.hpp>
+#include <catch2/catch.hpp>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
