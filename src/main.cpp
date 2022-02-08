@@ -23,7 +23,7 @@ auto main(int argc, char* argv[]) -> int
             .scan<'i', int>();
 
         program.add_argument("-n", "--num-samples")
-            .help("Stop after this many samples")
+            .help("Stop after these many samples")
             .default_value(default_num_samples)
             .scan<'i', int>();
 
