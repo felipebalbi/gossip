@@ -24,6 +24,21 @@ $ cmake ..
 $ cmake --build .
 ```
 
+#### Compiling under guix
+
+For those using the great `guix` package manager -- or perhaps the
+full `GuixSD` distribution -- we provide a manifest file names
+`guix.scm`. The compilation process starts with creating a pure
+environment containing only the required packages:
+
+```
+$ guix shell --pure -m guix.scm
+$ mkdir build
+$ cd build
+$ cmake ..
+$ cmake --build .
+```
+
 ### Cross-compiling for AArch64
 
 We also support a cross-compilation mode from Host to AArch64. The

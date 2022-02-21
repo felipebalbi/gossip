@@ -1,0 +1,12 @@
+(specifications->manifest
+ '(
+   "cmake"
+   "coreutils"
+   "gcc-toolchain"
+   "gdb"
+   "git"
+   "make"
+   "nss-certs"
+   "pkg-config"
+   "sed"
+   ))
