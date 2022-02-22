@@ -13,6 +13,14 @@
 #include <sstream>
 #include <thread>
 
+Gossip::Collector::Collector(
+    std::chrono::seconds& seconds, int num_samples, std::ostream& output)
+    : seconds(seconds)
+    , num_samples(num_samples)
+    , output(output)
+{
+}
+
 auto Gossip::Collector::collect_data() -> void
 {
     for (int i = 0; i < num_samples; ++i) {

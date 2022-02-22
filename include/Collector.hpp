@@ -15,12 +15,7 @@ namespace Gossip {
 class Collector {
 public:
     Collector(
-        std::chrono::seconds& seconds, int num_samples, std::ostream& output)
-        : seconds(seconds)
-        , num_samples(num_samples)
-        , output(output)
-    {
-    }
+        std::chrono::seconds& seconds, int num_samples, std::ostream& output);
 
     auto collect_data() -> void;
 
