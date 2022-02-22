@@ -10,15 +10,31 @@
 #include <filesystem>
 #include <iostream>
 #include <iterator>
+#include <set>
 #include <sstream>
+#include <string>
 #include <thread>
 
-Gossip::Collector::Collector(
+Gossip::Collector::Collector(std::string& pids_str,
     std::chrono::seconds& seconds, int num_samples, std::ostream& output)
     : seconds(seconds)
     , num_samples(num_samples)
     , output(output)
 {
+    if (pids_str.empty())
+        return;
+
+    std::istringstream ss { pids_str };
+    std::string pid;
+
+    while (std::getline(ss, pid, ',')) {
+        try {
+            pids.insert(std::stoi(pid));
+        } catch (const std::exception& err) {
+            std::cerr << "Skipping invalid PID: " << pid << std::endl;
+            continue;
+        }
+    }
 }
 
 auto Gossip::Collector::collect_data() -> void
@@ -42,6 +58,29 @@ auto Gossip::Collector::process_directories() -> void
     std::tm tm = *std::localtime(&timestamp);
 
     for (auto const& entry : std::filesystem::directory_iterator { procfs }) {
+        int pid;
+
+        /*
+         * If this is not the directory for a process, `std::stoi()'
+         * will throw `std::invalid_argument'. Let's catch it here and
+         * skip the directory right away.
+         */
+        try {
+            pid = std::stoi(entry.path().filename());
+        } catch (const std::invalid_argument& err) {
+            /* Skipping non-process directories */
+            continue;
+        }
+
+        /*
+         * If user requested a specific list of PIDs to be tracked and
+         * that list does not contain the current PID, just silently
+         * skip it.
+         */
+        if (!pids.empty() && !pids.contains(pid)) {
+            continue;
+        }
+
         try {
             Gossip::Process process { entry, tm };
             process.extract();

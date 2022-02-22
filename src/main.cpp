@@ -55,7 +55,7 @@ auto main(int argc, char* argv[]) -> int
                        "Locked,Timestamp"
                     << std::endl;
 
-        Gossip::Collector collector { seconds, num_samples, output_file };
+        Gossip::Collector collector { pids, seconds, num_samples, output_file };
 
         collector.collect_data();
     } catch (const std::exception& err) {

@@ -28,11 +28,6 @@ auto Gossip::Process::get_pid() -> void
 
     std::string process_id = directory.path().filename().string();
 
-    /*
-     * If this is not the directory for a process, `std::stoi()' will
-     * throw `std::invalid_argument'. Let it happen, upper layers will
-     * just ignore the directory.
-     */
     pid = std::stoi(process_id);
 }
 
