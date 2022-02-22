@@ -42,8 +42,8 @@ public:
 private:
     auto get_pid() -> void;
     auto get_cmdline() -> void;
-    auto get_values() -> void;
-    
+    auto get_smaps_rollup() -> void;
+
     int pid;
 
     std::string comm;

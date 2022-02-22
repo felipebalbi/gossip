@@ -17,7 +17,7 @@ auto Gossip::Process::extract() -> void
 {
     get_pid();
     get_cmdline();
-    get_values();
+    get_smaps_rollup();
 }
 
 auto Gossip::Process::get_pid() -> void
@@ -51,7 +51,7 @@ auto Gossip::Process::get_cmdline() -> void
     }
 }
 
-auto Gossip::Process::get_values() -> void
+auto Gossip::Process::get_smaps_rollup() -> void
 {
     std::ifstream process_smaps { directory.path() / "smaps_rollup" };
     std::string contents = std::string();
