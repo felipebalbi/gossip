@@ -27,6 +27,10 @@ auto main(int argc, char* argv[]) -> int
             .default_value(default_num_samples)
             .scan<'i', int>();
 
+        program.add_argument("-p", "--pids")
+            .help("Comma separated list of PIDs to track")
+            .default_value(std::string(""));
+
         program.add_argument("-o", "--output")
             .help("Output file name")
             .default_value(std::string("output.csv"));
@@ -35,6 +39,7 @@ auto main(int argc, char* argv[]) -> int
 
         auto interval = program.get<int>("--interval");
         auto num_samples = program.get<int>("--num-samples");
+        auto pids = program.get<std::string>("--pids");
         auto output = program.get<std::string>("--output");
 
         auto seconds = std::chrono::seconds(interval);
