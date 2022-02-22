@@ -8,6 +8,7 @@
 #include <Process.hpp>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <regex>
 #include <sstream>
 #include <string>
@@ -17,6 +18,7 @@ auto Gossip::Process::extract() -> void
     get_pid();
     get_cmdline();
     get_smaps_rollup();
+    get_stat();
 }
 
 auto Gossip::Process::get_pid() -> void
@@ -86,4 +88,29 @@ auto Gossip::Process::get_smaps_rollup() -> void
 
         values.push_back(value);
     }
+}
+
+auto Gossip::Process::get_stat() -> void
+{
+    std::ifstream stat { directory.path() / "stat" };
+    std::string line;
+    int i;
+
+    /*
+     * The only values we want are utime, stime, and num_threads to compute cpu
+     * utilization, we know they are fields 14, 15, and 20. but the fields are
+     * zero-based, so we skip fields 0 - 12, and later skip 15-18.
+     */
+    for (i = 0; i < 13; i++)
+        std::getline(stat, line, ' ');
+
+    std::getline(stat, line, ' ');
+
+    int utime = std::stoi(line);
+
+    std::getline(stat, line, ' ');
+
+    int stime = std::stoi(line);
+
+    total_time = utime + stime;
 }

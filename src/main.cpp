@@ -46,13 +46,14 @@ auto main(int argc, char* argv[]) -> int
         std::ofstream output_file(output, std::ios::ate);
 
         output_file << "# "
-                       "PID,Comm,Rss,Pss,Pss_Anon,Pss_File,Pss_Shmem,Shared_"
+                       "Total_CPU_Time,CPU_Threads,PID,Comm,Rss,Pss,Pss_Anon,"
+                       "Pss_File,Pss_Shmem,Shared_"
                        "Clean,Shared_Dirty,"
                        "Private_Clean,Private_Dirty,Referenced,Anonymous,"
                        "LazyFree,AnonHugePages,"
                        "ShmemPmdMapped,FilePmdMapped,Shared_Hugetlb,Private_"
                        "Hugetlb,Swap,SwapPss,"
-                       "Locked,Timestamp"
+                       "Locked,Total_Process_Time,Timestamp"
                     << std::endl;
 
         Gossip::Collector collector { pids, seconds, num_samples, output_file };

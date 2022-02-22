@@ -26,9 +26,11 @@ TEST_CASE("Processes can extract their data", "[Process]")
 
     const std::filesystem::path cmdline { base / "cmdline" };
     const std::filesystem::path smaps_rollup { base / "smaps_rollup" };
+    const std::filesystem::path stat { base / "stat" };
 
     std::ofstream cmdline_stream { cmdline };
     std::ofstream smaps_stream { smaps_rollup };
+    std::ofstream stat_stream { stat };
 
     cmdline_stream << "process" << pid;
     cmdline_stream.flush();
@@ -57,6 +59,11 @@ TEST_CASE("Processes can extract their data", "[Process]")
                     "Locked:               20 kB"
                  << std::endl;
 
+    stat_stream << pid << " (process) S 842 " << pid
+                << "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "
+                   "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+                << std::endl;
+
     const std::filesystem::directory_entry entry { base };
 
     REQUIRE(entry.is_directory());
@@ -73,7 +80,7 @@ TEST_CASE("Processes can extract their data", "[Process]")
         std::ostringstream output {};
 
         expected << pid << ",process" << pid
-                 << ",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,"
+                 << ",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,"
                  << std::put_time(&tm, "%F %T %z") << std::endl;
 
         process.extract();
@@ -116,14 +123,21 @@ TEST_CASE("Invalid processes don't crash", "[Process]")
 
         const std::filesystem::path cmdline { base / "cmdline" };
         const std::filesystem::path smaps_rollup { base / "smaps_rollup" };
+        const std::filesystem::path stat { base / "stat" };
 
         std::ofstream cmdline_stream { cmdline };
         std::ofstream smaps_stream { smaps_rollup };
+        std::ofstream stat_stream { stat };
 
         cmdline_stream << "";
         cmdline_stream.flush();
 
         smaps_stream << "skipped\n1\n2\n3" << std::endl;
+
+        stat_stream
+            << "2 (process) S 842 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "
+               "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+            << std::endl;
 
         std::time_t timestamp = std::chrono::system_clock::to_time_t(
             std::chrono::system_clock::now());
@@ -134,7 +148,7 @@ TEST_CASE("Invalid processes don't crash", "[Process]")
         std::ostringstream expected {};
         std::ostringstream output {};
 
-        expected << "2,unknown,1,2,3," << std::put_time(&tm, "%F %T %z")
+        expected << "2,unknown,1,2,3,0," << std::put_time(&tm, "%F %T %z")
                  << std::endl;
 
         process.extract();
@@ -151,14 +165,21 @@ TEST_CASE("Invalid processes don't crash", "[Process]")
 
         const std::filesystem::path cmdline { base / "cmdline" };
         const std::filesystem::path smaps_rollup { base / "smaps_rollup" };
+        const std::filesystem::path stat { base / "stat" };
 
         std::ofstream cmdline_stream { cmdline };
         std::ofstream smaps_stream { smaps_rollup };
+        std::ofstream stat_stream { stat };
 
         cmdline_stream << "process";
         cmdline_stream.flush();
 
         smaps_stream << "" << std::endl;
+
+        stat_stream
+            << "2 (process) S 842 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "
+               "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+            << std::endl;
 
         std::time_t timestamp = std::chrono::system_clock::to_time_t(
             std::chrono::system_clock::now());
@@ -177,15 +198,22 @@ TEST_CASE("Invalid processes don't crash", "[Process]")
 
         const std::filesystem::path cmdline { base / "cmdline" };
         const std::filesystem::path smaps_rollup { base / "smaps_rollup" };
+        const std::filesystem::path stat { base / "stat" };
 
         std::ofstream cmdline_stream { cmdline };
         std::ofstream smaps_stream { smaps_rollup };
+        std::ofstream stat_stream { stat };
 
         cmdline_stream << "process";
         cmdline_stream.flush();
 
         smaps_stream << "the quick brown fox jumps over the lazy dog"
                      << std::endl;
+
+        stat_stream
+            << "2 (process) S 842 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "
+               "551810 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+            << std::endl;
 
         std::time_t timestamp = std::chrono::system_clock::to_time_t(
             std::chrono::system_clock::now());

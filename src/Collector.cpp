@@ -6,6 +6,7 @@
  */
 
 #include <Collector.hpp>
+#include <Cpu.hpp>
 #include <Process.hpp>
 #include <filesystem>
 #include <iostream>
@@ -53,6 +54,8 @@ auto Gossip::Collector::collect_data() -> void
 auto Gossip::Collector::process_directories() -> void
 {
     const std::filesystem::path procfs { "/proc" };
+    const std::filesystem::directory_entry procdir { procfs };
+
     std::time_t timestamp = std::chrono::system_clock::to_time_t(
         std::chrono::system_clock::now());
     std::tm tm = *std::localtime(&timestamp);
@@ -83,8 +86,12 @@ auto Gossip::Collector::process_directories() -> void
 
         try {
             Gossip::Process process { entry, tm };
+            Gossip::Cpu cpu { procdir };
+
+            cpu.extract();
             process.extract();
 
+            output << cpu;
             output << process;
         } catch (const std::invalid_argument& err) {
             /* Skipping non-directories */

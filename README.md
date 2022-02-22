@@ -154,10 +154,11 @@ unimportant for `gossip` and merely skipped. For the other lines, each
 numeric value is extracted and used to build a line in CSV
 format.
 
-Each line in `gossip`'s output contains process `PID`, process name,
-and each of the values from `smaps_rollup` in the order they are
-extracted. Any further processing is expected to happen
-after-the-fact. This was deliberate decision to make sure `gossip`
-would run quickly and consume very little memory (currently below
-1MiB, most of which comes from `libstdc++` itself).
+Each line in `gossip`'s output contains the total CPU Usage Time, the
+number of CPUs, the process `PID`, process name, and each of the
+values from `smaps_rollup` in the order they are extracted, followed
+by the total scheduled time of the process. Any further processing is
+expected to happen after-the-fact. This was deliberate decision to
+make sure `gossip` would run quickly and consume very little memory
+(currently below 1MiB, most of which comes from `libstdc++` itself).
 

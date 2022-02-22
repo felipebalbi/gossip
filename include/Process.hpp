@@ -10,6 +10,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -22,6 +23,7 @@ public:
         , tm(tm)
     {
         pid = -1;
+        total_time = 0;
     }
 
     auto extract() -> void;
@@ -34,6 +36,8 @@ public:
             os << value << ",";
         }
 
+        os << process.total_time << ",";
+
         os << std::put_time(&process.tm, "%F %T %z") << std::endl;
 
         return os;
@@ -43,7 +47,9 @@ private:
     auto get_pid() -> void;
     auto get_cmdline() -> void;
     auto get_smaps_rollup() -> void;
+    auto get_stat() -> void;
 
+    int total_time;
     int pid;
 
     std::string comm;
