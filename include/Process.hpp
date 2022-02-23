@@ -17,10 +17,8 @@
 namespace Gossip {
 class Process {
 public:
-    Process(
-        const std::filesystem::directory_entry& directory, const std::tm& tm)
+    Process(const std::filesystem::directory_entry& directory)
         : directory(directory)
-        , tm(tm)
     {
         pid = -1;
         total_time = 0;
@@ -38,8 +36,6 @@ public:
 
         os << process.total_time << ",";
 
-        os << std::put_time(&process.tm, "%F %T %z") << std::endl;
-
         return os;
     }
 
@@ -55,7 +51,6 @@ private:
     std::string comm;
     std::vector<int> values;
 
-    const std::tm& tm;
     const std::filesystem::directory_entry& directory;
 };
 };

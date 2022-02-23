@@ -68,11 +68,7 @@ TEST_CASE("Processes can extract their data", "[Process]")
 
     REQUIRE(entry.is_directory());
 
-    std::time_t timestamp = std::chrono::system_clock::to_time_t(
-        std::chrono::system_clock::now());
-    std::tm tm = *std::localtime(&timestamp);
-
-    Gossip::Process process { entry, tm };
+    Gossip::Process process { entry };
 
     SECTION("extracting data initializes relevant fields")
     {
@@ -80,8 +76,7 @@ TEST_CASE("Processes can extract their data", "[Process]")
         std::ostringstream output {};
 
         expected << pid << ",process" << pid
-                 << ",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,"
-                 << std::put_time(&tm, "%F %T %z") << std::endl;
+                 << ",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,";
 
         process.extract();
         output << process;
@@ -106,11 +101,7 @@ TEST_CASE("Invalid processes don't crash", "[Process]")
         std::filesystem::create_directory(invalid_name);
         const std::filesystem::directory_entry entry { invalid_name };
 
-        std::time_t timestamp = std::chrono::system_clock::to_time_t(
-            std::chrono::system_clock::now());
-        std::tm tm = *std::localtime(&timestamp);
-
-        Gossip::Process process { entry, tm };
+        Gossip::Process process { entry };
 
         REQUIRE_THROWS_AS(process.extract(), std::invalid_argument);
     }
@@ -139,17 +130,12 @@ TEST_CASE("Invalid processes don't crash", "[Process]")
                "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
             << std::endl;
 
-        std::time_t timestamp = std::chrono::system_clock::to_time_t(
-            std::chrono::system_clock::now());
-        std::tm tm = *std::localtime(&timestamp);
-
-        Gossip::Process process { entry, tm };
+        Gossip::Process process { entry };
 
         std::ostringstream expected {};
         std::ostringstream output {};
 
-        expected << "2,unknown,1,2,3,0," << std::put_time(&tm, "%F %T %z")
-                 << std::endl;
+        expected << "2,unknown,1,2,3,0,";
 
         process.extract();
         output << process;
@@ -181,11 +167,7 @@ TEST_CASE("Invalid processes don't crash", "[Process]")
                "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
             << std::endl;
 
-        std::time_t timestamp = std::chrono::system_clock::to_time_t(
-            std::chrono::system_clock::now());
-        std::tm tm = *std::localtime(&timestamp);
-
-        Gossip::Process process { entry, tm };
+        Gossip::Process process { entry };
 
         REQUIRE_THROWS_AS(process.extract(), std::runtime_error);
     }
@@ -215,11 +197,7 @@ TEST_CASE("Invalid processes don't crash", "[Process]")
                "551810 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
             << std::endl;
 
-        std::time_t timestamp = std::chrono::system_clock::to_time_t(
-            std::chrono::system_clock::now());
-        std::tm tm = *std::localtime(&timestamp);
-
-        Gossip::Process process { entry, tm };
+        Gossip::Process process { entry };
 
         REQUIRE_THROWS_AS(process.extract(), std::runtime_error);
     }

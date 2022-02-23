@@ -85,7 +85,7 @@ auto Gossip::Collector::process_directories() -> void
         }
 
         try {
-            Gossip::Process process { entry, tm };
+            Gossip::Process process { entry };
             Gossip::Cpu cpu { procdir };
 
             cpu.extract();
@@ -93,6 +93,8 @@ auto Gossip::Collector::process_directories() -> void
 
             output << cpu;
             output << process;
+            output << std::put_time(&tm, "%F %T %z") << std::endl;
+
         } catch (const std::invalid_argument& err) {
             /* Skipping non-directories */
         } catch (const std::runtime_error& err) {
