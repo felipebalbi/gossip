@@ -6,7 +6,6 @@
  */
 
 #include <Process.hpp>
-#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <regex>
